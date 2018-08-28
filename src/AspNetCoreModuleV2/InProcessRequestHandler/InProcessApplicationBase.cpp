@@ -3,8 +3,6 @@
 
 #include "InProcessApplicationBase.h"
 
-hostfxr_main_fn InProcessApplicationBase::s_fMainCallback = NULL;
-
 InProcessApplicationBase::InProcessApplicationBase(
     IHttpServer& pHttpServer,
     IHttpApplication& pHttpApplication)
