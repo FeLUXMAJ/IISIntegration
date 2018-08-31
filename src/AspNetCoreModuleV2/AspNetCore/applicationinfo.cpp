@@ -41,33 +41,27 @@ APPLICATION_INFO::CreateHandler(
         SRWExclusiveLock lock(m_applicationLock);
         
         // check if other thread created application
-        hr = TryCreateHandler(pHttpContext, pHandler);
-        RETURN_IF_FAILED(hr);
-        if (hr == S_OK)
-        {
-            return S_OK;
-        }
-
-        // At this point application is either null or shutdown and is returning S_FALSE
-        
-        if (m_pApplication != nullptr)
-        {
-            LOG_INFO(L"Application went offline");
-
-            // Call to wait for application to complete stopping
-            m_pApplication->Stop(/* fServerInitiated */ false);
-            m_pApplication = nullptr;
-            m_pApplicationFactory = nullptr;   
-        }
-               
-        RETURN_IF_FAILED(CreateApplication(*pHttpContext->GetApplication()));
-
         RETURN_IF_FAILED(hr = TryCreateHandler(pHttpContext, pHandler));
 
-        // If TryCreateHandler doesn't succeed after recreating IAPPLICATION - fail
-        if (hr != S_OK)
+        // In some cases (adding and removing app_offline quickly) application might start and stop immediately 
+        // so retry until we get valid handler or error
+        while (hr != S_OK)
         {
-            RETURN_HR(E_APPLICATION_ACTIVATION_EXEC_FAILURE);
+            // At this point application is either null or shutdown and is returning S_FALSE
+
+            if (m_pApplication != nullptr)
+            {
+                LOG_INFO(L"Application went offline");
+
+                // Call to wait for application to complete stopping
+                m_pApplication->Stop(/* fServerInitiated */ false);
+                m_pApplication = nullptr;
+                m_pApplicationFactory = nullptr;
+            }
+
+            RETURN_IF_FAILED(CreateApplication(*pHttpContext->GetApplication()));
+
+            RETURN_IF_FAILED(hr = TryCreateHandler(pHttpContext, pHandler));
         }
     }
 
