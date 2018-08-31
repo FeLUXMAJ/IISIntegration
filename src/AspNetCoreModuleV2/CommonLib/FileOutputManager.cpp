@@ -60,10 +60,6 @@ FileOutputManager::Start()
             RETURN_LAST_ERROR();
         }
     }
-    else
-    {
-        m_fCreatedConsole = true;
-    }
 
     // Concatenate the log file name and application path
     RETURN_IF_FAILED(FILE_UTILITY::ConvertPathToFullPath(
