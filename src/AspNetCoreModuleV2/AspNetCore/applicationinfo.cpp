@@ -19,49 +19,80 @@ APPLICATION_INFO::~APPLICATION_INFO()
 }
 
 HRESULT
-APPLICATION_INFO::GetOrCreateApplication(
+APPLICATION_INFO::CreateHandler(
     IHttpContext *pHttpContext,
-    std::unique_ptr<IAPPLICATION, IAPPLICATION_DELETER>& pApplication
+    std::unique_ptr<IREQUEST_HANDLER, IREQUEST_HANDLER_DELETER>& pHandler
 )
 {
     HRESULT             hr = S_OK;
 
-    SRWExclusiveLock lock(m_applicationLock);
-
-    auto& httpApplication = *pHttpContext->GetApplication();
-
-    if (m_pApplication != nullptr)
     {
-        if (m_pApplication->QueryStatus() == RECYCLED)
+        SRWSharedLock lock(m_applicationLock);
+        
+        RETURN_IF_FAILED(hr = TryCreateHandler(pHttpContext, pHandler));
+
+        if (hr == S_OK)
+        {
+            return S_OK;
+        }
+    }
+    
+    {
+        SRWExclusiveLock lock(m_applicationLock);
+        
+        // check if other thread created application
+        hr = TryCreateHandler(pHttpContext, pHandler);
+        RETURN_IF_FAILED(hr);
+        if (hr == S_OK)
+        {
+            return S_OK;
+        }
+
+        // At this point application is either null or shutdown and is returning S_FALSE
+        
+        if (m_pApplication != nullptr)
         {
             LOG_INFO(L"Application went offline");
 
             // Call to wait for application to complete stopping
             m_pApplication->Stop(/* fServerInitiated */ false);
             m_pApplication = nullptr;
-            m_pApplicationFactory = nullptr;
+            m_pApplicationFactory = nullptr;   
         }
-        else
+               
+        RETURN_IF_FAILED(CreateApplication(*pHttpContext->GetApplication()));
+
+        RETURN_IF_FAILED(hr = TryCreateHandler(pHttpContext, pHandler));
+
+        // If TryCreateHandler doesn't succeed after recreating IAPPLICATION - fail
+        if (hr != S_OK)
         {
-            // another thread created the application
-            FINISHED(S_OK);
+            RETURN_HR(E_APPLICATION_ACTIVATION_EXEC_FAILURE);
         }
     }
 
-    if (AppOfflineApplication::ShouldBeStarted(httpApplication))
+    return S_OK;
+}
+
+HRESULT
+APPLICATION_INFO::CreateApplication(const IHttpApplication& pHttpApplication)
+{
+    HRESULT hr = S_OK;
+
+    if (AppOfflineApplication::ShouldBeStarted(pHttpApplication))
     {
         LOG_INFO(L"Detected app_offline file, creating polling application");
-        m_pApplication.reset(new AppOfflineApplication(httpApplication));
+        m_pApplication.reset(new AppOfflineApplication(pHttpApplication));
     }
     else
     {
-        FINISHED_IF_FAILED(m_handlerResolver.GetApplicationFactory(httpApplication, m_pApplicationFactory));
+        FINISHED_IF_FAILED(m_handlerResolver.GetApplicationFactory(pHttpApplication, m_pApplicationFactory));
 
         LOG_INFO(L"Creating handler application");
         IAPPLICATION * newApplication;
         FINISHED_IF_FAILED(m_pApplicationFactory->Execute(
             &m_pServer,
-            &httpApplication,
+            &pHttpApplication,
             &newApplication));
 
         m_pApplication.reset(newApplication);
@@ -69,26 +100,41 @@ APPLICATION_INFO::GetOrCreateApplication(
 
 Finished:
 
-    if (FAILED(hr))
+    if (m_pApplication == nullptr || FAILED(hr))
     {
         // Log the failure and update application info to not try again
         EventLog::Error(
             ASPNETCORE_EVENT_ADD_APPLICATION_ERROR,
             ASPNETCORE_EVENT_ADD_APPLICATION_ERROR_MSG,
-            httpApplication.GetApplicationId(),
+            pHttpApplication.GetApplicationId(),
             hr);
 
-        m_pApplication.reset(new ServerErrorApplication(httpApplication, hr));
-    }
-
-    if (m_pApplication)
-    {
-        pApplication = ReferenceApplication(m_pApplication.get());
+        m_pApplication.reset(new ServerErrorApplication(pHttpApplication, hr));
     }
 
     return hr;
 }
 
+HRESULT
+APPLICATION_INFO::TryCreateHandler(
+    IHttpContext *pHttpContext,
+    std::unique_ptr<IREQUEST_HANDLER, IREQUEST_HANDLER_DELETER>& pHandler)
+{
+    if (m_pApplication != nullptr)
+    {
+        IREQUEST_HANDLER * newHandler;
+        const auto result = m_pApplication->TryCreateHandler(pHttpContext, &newHandler);
+        RETURN_IF_FAILED(result);
+
+        if (result == S_OK)
+        {
+            pHandler.reset(newHandler);
+            // another thread created the application
+            return S_OK;
+        }
+    }
+    return S_FALSE;
+}
 
 VOID
 APPLICATION_INFO::ShutDownApplication(bool fServerInitiated)

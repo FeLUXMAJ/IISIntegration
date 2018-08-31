@@ -8,15 +8,20 @@
 #include "HandleWrapper.h"
 #include "exceptions.h"
 
-APPLICATION_STATUS PollingAppOfflineApplication::QueryStatus()
+HRESULT PollingAppOfflineApplication::TryCreateHandler(IHttpContext* pHttpContext, IREQUEST_HANDLER** pRequestHandler)
 {
     CheckAppOffline();
-    return APPLICATION::QueryStatus();
+    return LOG_IF_FAILED(APPLICATION::TryCreateHandler(pHttpContext, pRequestHandler));
 }
 
 void
 PollingAppOfflineApplication::CheckAppOffline()
 {
+    if (m_fStopCalled)
+    {
+        return;
+    }
+
     const auto ulCurrentTime = GetTickCount64();
     //
     // we only care about app offline presented. If not, it means the application has started
@@ -44,7 +49,7 @@ PollingAppOfflineApplication::CheckAppOffline()
 }
 
 
-std::filesystem::path PollingAppOfflineApplication::GetAppOfflineLocation(IHttpApplication& pApplication)
+std::filesystem::path PollingAppOfflineApplication::GetAppOfflineLocation(const IHttpApplication& pApplication)
 {
     return std::filesystem::path(pApplication.GetApplicationPhysicalPath()) / "app_offline.htm";
 }

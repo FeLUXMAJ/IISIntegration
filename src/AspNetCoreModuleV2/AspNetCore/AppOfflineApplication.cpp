@@ -55,7 +55,7 @@ HRESULT AppOfflineApplication::OnAppOfflineFound()
     return S_OK;
 }
 
-bool AppOfflineApplication::ShouldBeStarted(IHttpApplication& pApplication)
+bool AppOfflineApplication::ShouldBeStarted(const IHttpApplication& pApplication)
 {
     return FileExists(GetAppOfflineLocation(pApplication));
 }

@@ -27,7 +27,7 @@ HandlerResolver::HandlerResolver(HMODULE hModule, IHttpServer &pServer)
 }
 
 HRESULT
-HandlerResolver::LoadRequestHandlerAssembly(IHttpApplication &pApplication, ShimOptions& pConfiguration, std::unique_ptr<ApplicationFactory>& pApplicationFactory)
+HandlerResolver::LoadRequestHandlerAssembly(const IHttpApplication &pApplication, ShimOptions& pConfiguration, std::unique_ptr<ApplicationFactory>& pApplicationFactory)
 {
     HRESULT hr;
     PCWSTR              pstrHandlerDllName;
@@ -127,7 +127,7 @@ HandlerResolver::LoadRequestHandlerAssembly(IHttpApplication &pApplication, Shim
 }
 
 HRESULT
-HandlerResolver::GetApplicationFactory(IHttpApplication &pApplication, std::unique_ptr<ApplicationFactory>& pApplicationFactory)
+HandlerResolver::GetApplicationFactory(const IHttpApplication &pApplication, std::unique_ptr<ApplicationFactory>& pApplicationFactory)
 {
     try
     {
