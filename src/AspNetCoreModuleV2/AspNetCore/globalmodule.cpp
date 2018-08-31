@@ -34,7 +34,7 @@ ASPNET_CORE_GLOBAL_MODULE::OnGlobalStopListening(
     // we should let application manager to shutdown all allication
     // and dereference it as some requests may still reference to application manager
     m_pApplicationManager->ShutDown();
-    m_pApplicationManager = NULL;
+    m_pApplicationManager = nullptr;
 
     // Return processing to the pipeline.
     return GL_NOTIFICATION_CONTINUE;
@@ -59,11 +59,11 @@ ASPNET_CORE_GLOBAL_MODULE::OnGlobalConfigurationChange(
     LOG_INFOF(L"ASPNET_CORE_GLOBAL_MODULE::OnGlobalConfigurationChange '%ls'", pwszChangePath);
 
     // Test for an error.
-    if (NULL != pwszChangePath &&
+    if (nullptr != pwszChangePath &&
         _wcsicmp(pwszChangePath, L"MACHINE") != 0 &&
         _wcsicmp(pwszChangePath, L"MACHINE/WEBROOT") != 0)
     {
-        if (m_pApplicationManager != NULL)
+        if (m_pApplicationManager != nullptr)
         {
             m_pApplicationManager->RecycleApplicationFromManager(pwszChangePath);
         }

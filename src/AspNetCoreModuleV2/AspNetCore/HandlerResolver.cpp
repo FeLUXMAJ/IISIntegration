@@ -76,7 +76,7 @@ HandlerResolver::LoadRequestHandlerAssembly(IHttpApplication &pApplication, Shim
             hr = FindNativeAssemblyFromHostfxr(*options.get(), pstrHandlerDllName, handlerDllPath);
             outputManager->Stop();
 
-            if (FAILED(hr) && m_hHostFxrDll != NULL)
+            if (FAILED(hr) && m_hHostFxrDll != nullptr)
             {
                 STRA content;
                 STRU struStdMsg;

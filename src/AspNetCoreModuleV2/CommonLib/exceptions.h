@@ -31,20 +31,20 @@
 #define OBSERVE_CAUGHT_EXCEPTION()                              CaughtExceptionHResult(LOCATION_INFO);
 #define RETURN_CAUGHT_EXCEPTION()                               return CaughtExceptionHResult(LOCATION_INFO);
 
-#define RETURN_HR(hr)                                           do { HRESULT __hrRet = hr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); } return __hrRet; } while (0, 0)
+#define RETURN_HR(hr)                                           do { const HRESULT __hrRet = hr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); } return __hrRet; } while (0, 0)
 #define RETURN_LAST_ERROR()                                     do { return LogLastError(LOCATION_INFO); } while (0, 0)
-#define RETURN_IF_FAILED(hr)                                    do { HRESULT __hrRet = hr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); return __hrRet; }} while (0, 0)
+#define RETURN_IF_FAILED(hr)                                    do { const HRESULT __hrRet = hr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); return __hrRet; }} while (0, 0)
 #define RETURN_LAST_ERROR_IF(condition)                         do { if (condition) { return LogLastError(LOCATION_INFO); }} while (0, 0)
 #define RETURN_LAST_ERROR_IF_NULL(ptr)                          do { if ((ptr) == nullptr) { return LogLastError(LOCATION_INFO); }} while (0, 0)
 
-#define FINISHED(hrr)                                           do { HRESULT __hrRet = hrr; LogHResultFailed(LOCATION_INFO, __hrRet); hr = __hrRet; goto Finished; } while (0, 0)
-#define FINISHED_IF_FAILED(hrr)                                 do { HRESULT __hrRet = hrr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); hr = __hrRet; goto Finished; }} while (0, 0)
+#define FINISHED(hrr)                                           do { const HRESULT __hrRet = hrr; LogHResultFailed(LOCATION_INFO, __hrRet); hr = __hrRet; goto Finished; } while (0, 0)
+#define FINISHED_IF_FAILED(hrr)                                 do { const HRESULT __hrRet = hrr; if (FAILED(__hrRet)) { LogHResultFailed(LOCATION_INFO, __hrRet); hr = __hrRet; goto Finished; }} while (0, 0)
 #define FINISHED_IF_NULL_ALLOC(ptr)                             do { if ((ptr) == nullptr) { hr = LogHResultFailed(LOCATION_INFO, E_OUTOFMEMORY); goto Finished; }} while (0, 0)
 #define FINISHED_LAST_ERROR_IF(condition)                       do { if (condition) { hr = LogLastError(LOCATION_INFO); goto Finished; }} while (0, 0)
 #define FINISHED_LAST_ERROR_IF_NULL(ptr)                        do { if ((ptr) == nullptr) { hr = LogLastError(LOCATION_INFO); goto Finished; }} while (0, 0)
 
 #define THROW_LAST_ERROR()                                      do { ThrowResultException(LOCATION_INFO, LogLastError(LOCATION_INFO)); } while (0, 0)
-#define THROW_IF_FAILED(hr)                                     do { HRESULT __hrRet = hr; if (FAILED(__hrRet)) { ThrowResultException(LOCATION_INFO, __hrRet); }} while (0, 0)
+#define THROW_IF_FAILED(hr)                                     do { const HRESULT __hrRet = hr; if (FAILED(__hrRet)) { ThrowResultException(LOCATION_INFO, __hrRet); }} while (0, 0)
 #define THROW_LAST_ERROR_IF(condition)                          do { if (condition) { ThrowResultException(LOCATION_INFO, LogLastError(LOCATION_INFO)); }} while (0, 0)
 #define THROW_LAST_ERROR_IF_NULL(ptr)                           do { if ((ptr) == nullptr) { ThrowResultException(LOCATION_INFO, LogLastError(LOCATION_INFO)); }} while (0, 0)
 

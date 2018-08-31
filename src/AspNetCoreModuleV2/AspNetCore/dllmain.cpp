@@ -13,7 +13,7 @@
 
 DECLARE_DEBUG_PRINT_OBJECT("aspnetcorev2.dll");
 
-HANDLE              g_hEventLog = NULL;
+HANDLE              g_hEventLog = nullptr;
 BOOL                g_fRecycleProcessCalled = FALSE;
 BOOL                g_fInShutdown = FALSE;
 HINSTANCE           g_hServerModule;
@@ -22,10 +22,10 @@ VOID
 StaticCleanup()
 {
     APPLICATION_MANAGER::Cleanup();
-    if (g_hEventLog != NULL)
+    if (g_hEventLog != nullptr)
     {
         DeregisterEventSource(g_hEventLog);
-        g_hEventLog = NULL;
+        g_hEventLog = nullptr;
     }
 
     DebugStop();
@@ -88,18 +88,18 @@ HRESULT
     HRESULT                             hr = S_OK;
     HKEY                                hKey;
     BOOL                                fDisableANCM = FALSE;
-    ASPNET_CORE_PROXY_MODULE_FACTORY *  pFactory = NULL;
-    ASPNET_CORE_GLOBAL_MODULE *         pGlobalModule = NULL;
+    ASPNET_CORE_PROXY_MODULE_FACTORY *  pFactory = nullptr;
+    ASPNET_CORE_GLOBAL_MODULE *         pGlobalModule = nullptr;
 
     UNREFERENCED_PARAMETER(dwServerVersion);
 
     if (pHttpServer->IsCommandLineLaunch())
     {
-        g_hEventLog = RegisterEventSource(NULL, ASPNETCORE_IISEXPRESS_EVENT_PROVIDER);
+        g_hEventLog = RegisterEventSource(nullptr, ASPNETCORE_IISEXPRESS_EVENT_PROVIDER);
     }
     else
     {
-        g_hEventLog = RegisterEventSource(NULL, ASPNETCORE_EVENT_PROVIDER);
+        g_hEventLog = RegisterEventSource(nullptr, ASPNETCORE_EVENT_PROVIDER);
     }
 
     // check whether the feature is disabled due to security reason
@@ -116,7 +116,7 @@ HRESULT
         cbData = sizeof(dwData);
         if ((RegQueryValueEx(hKey,
             L"DisableANCM",
-            NULL,
+            nullptr,
             &dwType,
             (LPBYTE)&dwData,
             &cbData) == NO_ERROR) &&
@@ -151,11 +151,11 @@ HRESULT
                                   RQ_EXECUTE_REQUEST_HANDLER,
                                   0));
 
-    pFactory = NULL;
+    pFactory = nullptr;
 
     FINISHED_IF_FAILED(APPLICATION_MANAGER::StaticInitialize(g_hServerModule, *pHttpServer));
 
-    pGlobalModule = NULL;
+    pGlobalModule = nullptr;
 
     pGlobalModule = new ASPNET_CORE_GLOBAL_MODULE(APPLICATION_MANAGER::GetInstance());
 
@@ -164,21 +164,21 @@ HRESULT
                                      GL_CONFIGURATION_CHANGE | // Configuration change trigers IIS application stop
                                      GL_STOP_LISTENING));   // worker process stop or recycle
 
-    pGlobalModule = NULL;
+    pGlobalModule = nullptr;
 
     FINISHED_IF_FAILED(ALLOC_CACHE_HANDLER::StaticInitialize());
 
 Finished:
-    if (pGlobalModule != NULL)
+    if (pGlobalModule != nullptr)
     {
         delete pGlobalModule;
-        pGlobalModule = NULL;
+        pGlobalModule = nullptr;
     }
 
-    if (pFactory != NULL)
+    if (pFactory != nullptr)
     {
         pFactory->Terminate();
-        pFactory = NULL;
+        pFactory = nullptr;
     }
 
     return hr;

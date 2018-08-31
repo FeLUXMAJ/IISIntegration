@@ -31,10 +31,10 @@ public:
     VOID
     Cleanup()
     {
-        if(sm_pApplicationManager != NULL)
+        if(sm_pApplicationManager != nullptr)
         {
             delete sm_pApplicationManager;
-            sm_pApplicationManager = NULL;
+            sm_pApplicationManager = nullptr;
         }
     }
 
