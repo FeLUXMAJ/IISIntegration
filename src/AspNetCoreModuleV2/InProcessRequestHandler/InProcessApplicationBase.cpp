@@ -33,7 +33,21 @@ InProcessApplicationBase::StopInternal(bool fServerInitiated)
     }
     else
     {
-        exit(0);
+        // Send WM_QUIT to the main window to initiate graceful shutdown
+        EnumWindows([](HWND hwnd, LPARAM) -> BOOL
+        {
+            DWORD processId;
+
+            if (GetWindowThreadProcessId(hwnd, &processId) &&
+                processId == GetCurrentProcessId() &&
+                GetConsoleWindow() != hwnd)
+            {
+                PostMessage(hwnd, WM_QUIT, 0, 0);
+                return false;
+            }
+
+            return true;
+        }, 0);
     }
 }
 
