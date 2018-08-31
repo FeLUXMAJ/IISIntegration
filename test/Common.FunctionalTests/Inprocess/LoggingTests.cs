@@ -207,7 +207,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
             deploymentParameters.HandlerSettings["debugLevel"] = "file,eventlog";
             var deploymentResult = await StartAsync(deploymentParameters);
             StopServer();
-            EventLogHelpers.VerifyEventLogEvent(deploymentResult, "Description: IIS ASP.NET Core Module V2. Commit");
+            EventLogHelpers.VerifyEventLogEvent(deploymentResult, @"\[aspnetcorev2.dll\] Initializing logs for .*?Description: IIS ASP.NET Core Module V2");
         }
 
         [ConditionalFact]
