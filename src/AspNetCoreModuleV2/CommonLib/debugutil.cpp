@@ -96,27 +96,6 @@ void SetDebugFlags(const std::wstring &debugValue)
 {
     try
     {
-        if (!debugValue.empty() && debugValue.find_first_not_of(L"0123456789") == std::wstring::npos)
-        {
-            const auto value = std::stoi(debugValue);
-
-            if (value >= 1) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_ERROR;
-            if (value >= 2) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_WARNING;
-            if (value >= 3) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_INFO;
-            if (value >= 4) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_CONSOLE;
-            if (value >= 5) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_FILE;
-            if (value >= 6) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_EVENTLOG;
-
-            return;
-        }
-    }
-    catch (...)
-    {
-        // ignore
-    }
-
-    try
-    {
         std::wstringstream stringStream(debugValue);
         std::wstring flag;
 
@@ -214,7 +193,7 @@ DebugInitialize(HMODULE hModule)
 
     try
     {
-        SetDebugFlags(Environment::GetEnvironmentVariableValue(L"ASPNETCORE_MODULE_DEBUG").value_or(L"0"));
+        SetDebugFlags(Environment::GetEnvironmentVariableValue(L"ASPNETCORE_MODULE_DEBUG").value_or(L""));
     }
     catch (...)
     {
