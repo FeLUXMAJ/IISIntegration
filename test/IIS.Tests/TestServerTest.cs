@@ -13,16 +13,11 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
     [OSSkipCondition(OperatingSystems.Windows, WindowsVersions.Win7, "https://github.com/aspnet/IISIntegration/issues/866")]
     public class TestServerTest : LoggedTest
     {
-        [ConditionalTheory]
-        [InlineData(1)]
-        [InlineData(15)]
-        [InlineData(25)]
-        public async Task SingleProcessTestServer_HelloWorld(int count)
+        [ConditionalFact]
+        public async Task SingleProcessTestServer_HelloWorld()
         {
-            for (int i = 0; i < count; i++)
-            {
-                var helloWorld = "Hello World";
-                var expectedPath = "/Path";
+            var helloWorld = "Hello World";
+            var expectedPath = "/Path";
 
                 string path = null;
                 using (var testServer = await TestServer.Create(ctx =>
@@ -35,7 +30,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
                     Assert.Equal(helloWorld, await result.Content.ReadAsStringAsync());
                     Assert.Equal(expectedPath, path);
                 }
-            }   
             }
         }
 }

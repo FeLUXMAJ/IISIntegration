@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
             {
                 // Server might close a connection before request completes
             }
-            
+
             deploymentResult.AssertWorkerProcessStop();
         }
 
@@ -51,7 +51,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
                 var statusCode = (int)response.StatusCode;
                 Assert.True(statusCode == 200 || statusCode == 503, "Status code was " + statusCode);
             });
-
 
             try
             {
